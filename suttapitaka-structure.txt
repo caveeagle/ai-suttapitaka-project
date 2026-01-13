@@ -1,0 +1,21 @@
+
+Example file: sn12.62_translation-en-sujato.json
+
+Example string id:  sn12.62:1.8
+
+------------------------------------------------
+
+Sutta Pitaka - Collection of suttas - all data
+
+Nikaya - Discourses - in file name: sn  
+
+Books - sn12
+
+Chapters - 1 file 
+
+Sutta -  sn12.62 (62)
+
+Segment (1 line in a file) - 1.8
+
+------------------------------------------------
+
