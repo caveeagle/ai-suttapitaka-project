@@ -1,4 +1,5 @@
 import sqlite3
+import math
 
 #########################################################
 #########################################################
@@ -8,57 +9,53 @@ db = 'sutta-pitaka.sqlite'
 
 MAX_TOKENS_IN_CHAPTER = 800
 
-#########################################################
-#########################################################
-#########################################################
+OPTIMAL_TOKENS = 6
+00
 
-SMALL_CHAPTERS = []
-
-BIG_CHAPTERS = []
+#########################################################
+#########################################################
+#########################################################
 
 with sqlite3.connect(db) as conn:
-    
     cursor = conn.cursor()
-    
-    SQL_QUERY = f'''
-            SELECT chapter
-            FROM segments
-            GROUP BY chapter
-            HAVING SUM(LENGTH(content)) < {MAX_TOKENS_IN_CHAPTER*4};
-    '''
-    
-    cursor.execute(SQL_QUERY)
+    cursor.execute('SELECT * FROM chapters_info ORDER BY id')
+    chapters_info = cursor.fetchall()    
 
-    SMALL_CHAPTERS = [row[0] for row in cursor.fetchall()]
-    
-    print('Small chapters:',len(SMALL_CHAPTERS))    
+#########################################################
 
-    SQL_QUERY = f'''
-            SELECT chapter
-            FROM segments
-            GROUP BY chapter
-            HAVING SUM(LENGTH(content)) >= {MAX_TOKENS_IN_CHAPTER*4};
-    '''
-    
-    cursor.execute(SQL_QUERY)
+chunks = []
 
-    BIG_CHAPTERS = [row[0] for row in cursor.fetchall()]
+for (
+    _,
+    chapter,
+    rows_count,
+    total_chars,
+    start_row_id,
+    start_segment_id,
+    end_row_id,
+    end_segment_id,
+) in chapters_info:
+
+    if( total_chars//4 < MAX_TOKENS_IN_CHAPTER ): #  small chapter - one chunk
+        
+        chunk['chapter'] = chapter
+        chunk['start_row_id'] = start_row_id
+        chunk['end_row_id'] = end_row_id
+        chunk['start_seg_id'] = start_segment_id
+        chunk['end_seg_id'] = start_segment_id
+        
+        chunks.add(chunk)
     
-    print('Big chapters:',len(BIG_CHAPTERS))    
-    
-    SQL_QUERY = 'SELECT COUNT(DISTINCT chapter) AS total_chapters FROM segments'
-    
-    cursor.execute(SQL_QUERY)
-    
-    total_chapters = cursor.fetchone()[0]
-    
-    print(f'total={total_chapters}')
-    
-    assert total_chapters == len(BIG_CHAPTERS) + len(SMALL_CHAPTERS)
-    
-#########################################################
-#########################################################
-#########################################################
+    else: # BIG chapter    
+
+        num_of_splits = ( (total_chars/4) // OPTIMAL_TOKENS ) + 1
+
+        str_per_split = math.ceil( (end_row_id - start_row_id + 1) / num_of_splits )
+        
+        for N in range( num_of_splits ):
+            
+            chunk['
+
 
 
 

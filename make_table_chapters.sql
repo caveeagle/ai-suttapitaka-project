@@ -1,3 +1,6 @@
+
+##################################################
+
 CREATE INDEX IF NOT EXISTS idx_segments_chapter_row
 ON segments (chapter, row_id);
 

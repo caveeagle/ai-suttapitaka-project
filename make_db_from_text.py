@@ -93,7 +93,9 @@ for (file_id, segment_id, text, row_id) in raw_data:
 
 print(f'Skipped {skipped} strings')
 
-db_data.sort(key=lambda x: x[0])
+db_data.sort(key=lambda x: x[0]) #  sorted by row_id
+
+db_data = [row[1:] for row in db_data] #  and delete row_id from data
 
 ##################################################
 
@@ -105,8 +107,8 @@ with sqlite3.connect(db) as conn:
     
     cursor.executemany('''
         INSERT INTO segments
-        (row_id, segment_id, book, chapter, sutta, content)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (segment_id, book, chapter, sutta, content)
+        VALUES (?, ?, ?, ?, ?)
     ''', db_data)
     
     inserted = cursor.rowcount
