@@ -28,6 +28,8 @@ with sqlite3.connect(db) as conn:
 #########################################################
 #########################################################
 
+###   Make chunks structure with chunk's bounds (without text)
+
 chunks = []
 
 for (
@@ -80,6 +82,10 @@ for (
             
             chunk['end_row_id'] = start_row_id + chunk_end_shift
             
+            chunk['start_seg_id'] = None
+            
+            chunk['end_seg_id'] = None
+            
             chunk['chapter'] = chapter
             
             chunks.append(chunk)
@@ -89,6 +95,51 @@ print(f'Make {len(chunks)} chunks')
 #########################################################
 #########################################################
 #########################################################
+
+###   Add chunks (without text) into DB 
+
+with sqlite3.connect(db) as conn:
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM chunks")
+
+    SQL = '''
+    INSERT INTO chunks (
+        chapter,
+        start_row_id,
+        end_row_id,
+        start_seg_id,
+        end_seg_id
+    )
+    VALUES (
+        :chapter,
+        :start_row_id,
+        :end_row_id,
+        :start_seg_id,
+        :end_seg_id
+    )
+    '''
+
+    cursor.executemany(SQL, chunks)
+    inserted = cursor.rowcount
+    conn.commit()
+
+print(f'Inserted {inserted} rows into db')
+
+#########################################################
+#########################################################
+#########################################################
+
+'''
+
+SELECT COUNT(*) AS bad_order
+FROM chunks
+WHERE start_row_id > end_row_id;
+
+
+'''
+
+#bad_order != 0 !!!!!
 
 
 
