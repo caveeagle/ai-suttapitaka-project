@@ -4,7 +4,7 @@
 
 `sutta-pitaka.sqlite` - database with main data (SQLite)
 
-`make_db.py` - script to make this database from text files
+`make_db_sutras.py` - script to make table `segments` with sutra's text from text files
 
 `/sutta-data` - dir with text files (not in git!)
 
