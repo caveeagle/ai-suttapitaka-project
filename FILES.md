@@ -7,3 +7,6 @@
 `make_db.py` - script to make this database from text files
 
 `/sutta-data` - dir with text files (not in git!)
+
+`/backups/SuttaCentral.rar` - raw text data from https://github.com/suttacentral
+
