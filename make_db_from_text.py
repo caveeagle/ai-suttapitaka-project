@@ -105,6 +105,8 @@ with sqlite3.connect(db) as conn:
     
     cursor.execute('DELETE FROM segments')
     
+    cursor.execute("DELETE FROM sqlite_sequence WHERE name = 'segments' ")
+    
     cursor.executemany('''
         INSERT INTO segments
         (segment_id, book, chapter, sutta, content)

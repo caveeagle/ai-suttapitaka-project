@@ -34,6 +34,12 @@ GROUP BY segments_outer.chapter;
 
 ##################################################
 
+DELETE FROM chapters_info
+
+DELETE FROM sqlite_sequence WHERE name = 'chapters_info' 
+
+##################################################
+
 INSERT INTO chapters_info (
     chapter,
     rows_count,

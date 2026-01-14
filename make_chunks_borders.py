@@ -11,7 +11,7 @@ MAX_TOKENS_IN_CHAPTER = 800
 
 OPTIMAL_TOKENS = 400  # 1 token = 4 chars
 
-OVERLAP_TOKENS = 70  # ~10-20% of chunk
+OVERLAP_TOKENS = 20  # ~10-20% of chunk
 
 OVERLAP_STRINGS = OVERLAP_TOKENS // 17.5
 
@@ -90,6 +90,34 @@ for (
             
             chunks.append(chunk)
 
+            if(1): # !!!!!!!!!!!!!
+                
+                if( chunk['start_row_id']==45626 ):
+                    
+                    print(f'\n\n')
+                    
+                    print(chunk)
+                    
+                    print(f'chunk_start_shift={chunk_start_shift}')
+                    print(f'chunk_end_shift={chunk_end_shift}')
+                    
+                    c = ( (N+1) * str_per_split) - 1
+            
+                    d = c + OVERLAP_STRINGS # 663
+                    
+                    print(c,d) 
+                    
+                    print(end_row_id-start_row_id)
+                    
+                    
+                    print('OVERLAP_STRINGS,num_of_splits,str_per_split,start_row_id,N')
+                    print(OVERLAP_STRINGS,num_of_splits,str_per_split,start_row_id,N)
+                    
+                    
+                    print(f'\n\n')
+            
+
+
 print(f'Make {len(chunks)} chunks')
 
 #########################################################
@@ -102,6 +130,8 @@ with sqlite3.connect(db) as conn:
     cursor = conn.cursor()
 
     cursor.execute("DELETE FROM chunks")
+    
+    cursor.execute("DELETE FROM sqlite_sequence WHERE name = 'chunks' ")
 
     SQL = '''
     INSERT INTO chunks (
@@ -130,18 +160,15 @@ print(f'Inserted {inserted} rows into db')
 #########################################################
 #########################################################
 
+
 '''
 
-SELECT COUNT(*) AS bad_order
+DELETE
 FROM chunks
 WHERE start_row_id > end_row_id;
 
 
 '''
-
-#bad_order != 0 !!!!!
-
-
 
 #########################################################
 #########################################################
