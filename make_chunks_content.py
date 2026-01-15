@@ -1,4 +1,5 @@
 import sqlite3
+import hashlib
 
 #########################################################
 #########################################################
@@ -19,7 +20,7 @@ with sqlite3.connect(db) as conn:
     chunks = cursor.fetchall()    
 
     cursor.execute('SELECT * FROM segments ORDER BY row_id')
-    segments_by_id = {row["row_id"]: row for row in cursor.fetchall()}  
+    segments_by_id = {row['row_id']: row for row in cursor.fetchall()}  
 
 #########################################################
 #########################################################
@@ -43,9 +44,9 @@ for chunk in chunks:
     
     start_seg_id = segments_by_id[start_row_id]['segment_id']
     
-    if chunk["start_seg_id"] is not None:
+    if chunk['start_seg_id'] is not None:
            
-           assert chunk["start_seg_id"] == start_seg_id
+           assert chunk['start_seg_id'] == start_seg_id
     
     updated_chunk['start_seg_id'] = start_seg_id
     
@@ -57,9 +58,9 @@ for chunk in chunks:
     
     end_seg_id = segments_by_id[end_row_id]['segment_id']
     
-    if chunk["end_seg_id"] is not None:
+    if chunk['end_seg_id'] is not None:
         
-        assert chunk["end_seg_id"] == end_seg_id
+        assert chunk['end_seg_id'] == end_seg_id
     
     updated_chunk['end_seg_id'] = end_seg_id
     
@@ -73,7 +74,7 @@ for chunk in chunks:
 
           lines.append(text)
     
-    chunk_content = "\n".join(lines)
+    chunk_content = '\n'.join(lines)
     
     updated_chunk['content'] = chunk_content
     
@@ -82,6 +83,11 @@ for chunk in chunks:
     if updated_chunk['tokens'] > MAX_TOKENS:
               
               BIG_CHUNKS_IDS.append(chunk['id'])
+              
+    chunk_hash = hashlib.sha256(chunk_content.encode("utf-8")).hexdigest()
+    
+    updated_chunk['chunk_hash'] = chunk_hash
+          
 
     ###########################################      
     
@@ -91,15 +97,16 @@ for chunk in chunks:
 #########################################################
 #########################################################
 
-SQL = """
+SQL = '''
 UPDATE chunks
 SET
     start_seg_id = :start_seg_id,
     end_seg_id = :end_seg_id,
     content = :content,
-    tokens = :tokens
+    tokens = :tokens,
+    chunk_hash = :chunk_hash
 WHERE id = :id
-"""
+'''
 
 with sqlite3.connect(db) as conn:
     cursor = conn.cursor()
@@ -115,10 +122,10 @@ print(f'Updated {updated} fileds')
 
 ### Some trick - delete extremely big chunks:
 
-placeholders = ",".join("?" * len(BIG_CHUNKS_IDS))
+placeholders = ','.join('?' * len(BIG_CHUNKS_IDS))
 
 cursor.execute(
-    f"DELETE FROM chunks WHERE id IN ({placeholders})",
+    f'DELETE FROM chunks WHERE id IN ({placeholders})',
     BIG_CHUNKS_IDS
 )
 
