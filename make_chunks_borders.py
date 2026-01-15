@@ -7,11 +7,11 @@ import math
 
 db = 'sutta-pitaka.sqlite'
 
-MAX_TOKENS_IN_CHAPTER = 800
+MAX_TOKENS_IN_CHAPTER = 600
 
-OPTIMAL_TOKENS = 400  # 1 token = 4 chars
+OPTIMAL_TOKENS = 300  # 1 token = 4 chars
 
-OVERLAP_TOKENS = 20  # ~10-20% of chunk
+OVERLAP_TOKENS = 60  # ~10-20% of chunk
 
 OVERLAP_STRINGS = OVERLAP_TOKENS // 17.5
 
@@ -51,7 +51,7 @@ for (
         chunk['start_row_id'] = start_row_id
         chunk['end_row_id'] = end_row_id
         chunk['start_seg_id'] = start_segment_id
-        chunk['end_seg_id'] = start_segment_id
+        chunk['end_seg_id'] = end_segment_id
         
         chunks.append(chunk)
     
@@ -88,35 +88,14 @@ for (
             
             chunk['chapter'] = chapter
             
+            ### Some trick (I don't have time to solve this)
+            
+            if chunk['start_row_id'] >= chunk['end_row_id']:
+
+                continue
+            ###################
+            
             chunks.append(chunk)
-
-            if(1): # !!!!!!!!!!!!!
-                
-                if( chunk['start_row_id']==45626 ):
-                    
-                    print(f'\n\n')
-                    
-                    print(chunk)
-                    
-                    print(f'chunk_start_shift={chunk_start_shift}')
-                    print(f'chunk_end_shift={chunk_end_shift}')
-                    
-                    c = ( (N+1) * str_per_split) - 1
-            
-                    d = c + OVERLAP_STRINGS # 663
-                    
-                    print(c,d) 
-                    
-                    print(end_row_id-start_row_id)
-                    
-                    
-                    print('OVERLAP_STRINGS,num_of_splits,str_per_split,start_row_id,N')
-                    print(OVERLAP_STRINGS,num_of_splits,str_per_split,start_row_id,N)
-                    
-                    
-                    print(f'\n\n')
-            
-
 
 print(f'Make {len(chunks)} chunks')
 
@@ -155,20 +134,6 @@ with sqlite3.connect(db) as conn:
     conn.commit()
 
 print(f'Inserted {inserted} rows into db')
-
-#########################################################
-#########################################################
-#########################################################
-
-
-'''
-
-DELETE
-FROM chunks
-WHERE start_row_id > end_row_id;
-
-
-'''
 
 #########################################################
 #########################################################
