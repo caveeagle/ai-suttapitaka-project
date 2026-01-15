@@ -91,6 +91,42 @@ for chunk in chunks:
 #########################################################
 #########################################################
 
+SQL = """
+UPDATE chunks
+SET
+    start_seg_id = :start_seg_id,
+    end_seg_id = :end_seg_id,
+    content = :content,
+    tokens = :tokens
+WHERE id = :id
+"""
+
+with sqlite3.connect(db) as conn:
+    cursor = conn.cursor()
+    cursor.executemany(SQL, UPD_CHUNKS)
+    updated = cursor.rowcount
+    conn.commit()
+
+print(f'Updated {updated} fileds')
+
+#########################################################
+#########################################################
+#########################################################
+
+### Some trick - delete extremely big chunks:
+
+placeholders = ",".join("?" * len(BIG_CHUNKS_IDS))
+
+cursor.execute(
+    f"DELETE FROM chunks WHERE id IN ({placeholders})",
+    BIG_CHUNKS_IDS
+)
+
+deleted = cursor.rowcount
+
+conn.commit()
+
+print(f'Delete {deleted} very big chunks')
 
 #########################################################
 #########################################################
