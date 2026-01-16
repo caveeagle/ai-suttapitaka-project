@@ -10,5 +10,5 @@
 8. Run `make_table_chapters.sql` sql file, it fills the table `chapters_info`
 9. Run script `make_chunks_borders.py` it makes chunks borders in the table `chunks`
 10. Run script `make_chunks_content.py` - it fills chunk's content in the table `chunks`
-11. Run script `make_embedding.py`- and **smth happend**
-12. 
+11. Run script `make_embedding.py`as many times as needed - it fills `embeddings` table
+12. Run `check_embeddings.py` 

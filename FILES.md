@@ -20,4 +20,4 @@
 
 `PIPELINE.md` - A way to reproduce my results
 
-`clear_embeddings.py` - Clear (delete or show) embeddings if chunks changed
+`check_embeddings.py` - Check (delete or show) embeddings if chunks changed
