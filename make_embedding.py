@@ -17,21 +17,25 @@ db = 'sutta-pitaka.sqlite'
 #########################################################
 #########################################################
 
+print(f'Begin to work...')
 
 with sqlite3.connect(db) as conn:
     
     cursor = conn.cursor()
 
-    cursor.execute('''
+    cursor.execute(f'''
     SELECT id, content, chunk_hash
     FROM chunks
     WHERE id NOT IN (
         SELECT chunk_id FROM embeddings
     )
     ORDER BY id
+    LIMIT {BATCH_SIZE}
     ''')
     
     rows = cursor.fetchall()
+
+print(f'Select {len(rows)} chunks')
     
 ############################################
 
@@ -80,6 +84,8 @@ with sqlite3.connect(db) as conn:
         
             # всё остальное
             raise RuntimeError("Gemini API: unexpected error") from e
+        
+        print(f'Recieved Embedding for chunks (from {i} to {i + BATCH_SIZE} in portion')
             
         ############################################################    
             
@@ -95,15 +101,9 @@ with sqlite3.connect(db) as conn:
             )
             
             conn.commit()
-
-        print(f'OK, EXIT')
-        raise SystemExit()
-    
-    
-#########################################################
-#########################################################
-#########################################################
-
+        
+        print(f'Add batch into DB')
+        
 #########################################################
 #########################################################
 #########################################################
