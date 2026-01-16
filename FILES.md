@@ -8,6 +8,6 @@
 
 `/sutta-data` - dir with text files (not in git!)
 
-`/backups/SuttaCentral.rar` - raw text data from https://github.com/suttacentral
+`/backups/sutta-data.zip` - raw text data from https://github.com/suttacentral
 
 `make_table_chapters.sql` - sql-file for making table `chapters_info`
