@@ -30,7 +30,7 @@ with sqlite3.connect(db) as conn:
         SELECT chunk_id FROM embeddings
     )
     ORDER BY id
-    LIMIT {BATCH_SIZE*400}
+    LIMIT {BATCH_SIZE*100}
     ''')
     
     rows = cursor.fetchall()
@@ -87,7 +87,7 @@ with sqlite3.connect(db) as conn:
             # всё остальное
             raise RuntimeError("Gemini API: unexpected error") from e
         
-        print(f'Recieved Embedding for chunks (from {i} to {i + BATCH_SIZE} in portion')
+        print(f'Recieved Embedding: (from {i} to {i + BATCH_SIZE} in {len(rows)})')
         
         ############################################################    
             
