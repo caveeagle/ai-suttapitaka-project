@@ -1,5 +1,5 @@
 import sqlite3
-
+import time
 import numpy as np
 from google import genai
 
@@ -30,12 +30,12 @@ with sqlite3.connect(db) as conn:
         SELECT chunk_id FROM embeddings
     )
     ORDER BY id
-    LIMIT {BATCH_SIZE}
+    LIMIT {BATCH_SIZE*400}
     ''')
     
     rows = cursor.fetchall()
 
-print(f'Select {len(rows)} chunks')
+print(f'\nSELECT {len(rows)} CHUNKS\n')
     
 ############################################
 
@@ -62,7 +62,9 @@ with sqlite3.connect(db) as conn:
                 model="models/text-embedding-004",
                 contents=texts   # list[str]
             )
-    
+            
+            time.sleep(1.0)  # Wait before new request !
+            
         except Exception as e:
             msg = str(e).lower()
         
@@ -86,7 +88,7 @@ with sqlite3.connect(db) as conn:
             raise RuntimeError("Gemini API: unexpected error") from e
         
         print(f'Recieved Embedding for chunks (from {i} to {i + BATCH_SIZE} in portion')
-            
+        
         ############################################################    
             
         for (chunk_id, _, chunk_hash), emb in zip(batch, response.embeddings):
@@ -102,7 +104,10 @@ with sqlite3.connect(db) as conn:
             
             conn.commit()
         
-        print(f'Add batch into DB')
+        print(f'Add batch into DB\n')
+        
+        
+
         
 #########################################################
 #########################################################
