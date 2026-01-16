@@ -10,4 +10,13 @@
 
 `/backups/sutta-data.zip` - raw text data from https://github.com/suttacentral
 
+`/backups/sutta-pitaka.backup.sqlite.sql` - sql with DB structure (only structure)
+
 `make_table_chapters.sql` - sql-file for making table `chapters_info`
+
+`make_chunks_borders.py` and `make_chunks_content.py` - split chapters by chunks into table `chunks`
+
+`make_embedding.py` - create embedding vectors and place into table `embeddings`
+
+`PIPELINE.md` - A way to reproduce my results
+
