@@ -21,3 +21,5 @@
 `PIPELINE.md` - A way to reproduce my results
 
 `check_embeddings.py` - Check (delete or show) embeddings if chunks changed
+
+`indexing.py` - library (module) for indexing and search
