@@ -8,14 +8,48 @@ from model_indexing import build_index, search
 #########################################################
 #########################################################
 
+DEBUG = 0
+
 TOP_K = 5
 
-MODEL = "gemini-2.0-flash-lite"
+MODEL = 'gemini-2.0-flash-lite'
 
 QUESTION = (
-    "According to the Buddha, which sensory experiences "
-    "most strongly occupy a man’s mind?"
+    'According to the Buddha, which sensory experiences '
+    'most strongly occupy a man’s mind?'
 )
+
+#########################################################
+#########################################################
+
+PROMPT_TEMPLATE = """
+You answer questions using ONLY the provided sources.
+
+Each source is marked as [CHAPTER <id>].
+
+Rules:
+- Use ONLY information that is explicitly present in the sources.
+- If the answer is NOT present in the sources, output exactly:
+  The answer is not found in the provided sources.
+- Do NOT use outside knowledge.
+- Do NOT invent sources.
+- Do NOT invent CHUNK IDs.
+- Follow the output format exactly.
+
+Question:
+{question}
+
+Sources:
+{sources}
+
+Output format (must be exact):
+
+Answer:
+<answer OR the no-answer sentence>
+
+Sources:
+<comma-separated CHAPTER IDs, or empty if no answer>
+"""
 
 #########################################################
 #########################################################
@@ -30,7 +64,7 @@ client = genai.Client(api_key=API_KEY)
 index, chunk_ids = build_index()
 
 resp = client.models.embed_content(
-    model="models/text-embedding-004",
+    model='models/text-embedding-004',
     contents=[QUESTION],
 )
 
@@ -45,14 +79,20 @@ db = 'sutta-pitaka.sqlite'
 
 context_lines = []
 
-placeholders = ",".join("?" for _ in top_chunk_ids)
+placeholders = ','.join('?' for _ in top_chunk_ids)
 
-query = f"""
+query = f'''
 SELECT *
 FROM chunks
 WHERE id IN ({placeholders})
 ORDER BY id
-"""
+'''
+
+
+query_debug = query
+for v in top_chunk_ids:
+    query_debug = query_debug.replace('?', repr(v), 1)
+print(top_chunk_ids)
 
 with sqlite3.connect(db) as conn:
     conn.row_factory = sqlite3.Row
@@ -61,28 +101,29 @@ with sqlite3.connect(db) as conn:
     cursor.execute(query, top_chunk_ids)
     rows = cursor.fetchall()
     
-contents = [row["content"] for row in rows]
-   
-context = "\n".join(contents)
+content_blocks = []
 
-#########################################################
-#########################################################
+for row in rows:
+    content_blocks.append(
+        f"[CHAPTER {row['chapter']}]\n{row['content']}"
+    )
 
-PROMPT = f'''
-Answer the question using only the provided sources.
+CONTEXT = '\n\n'.join(content_blocks)
 
-Question:
-{QUESTION}
 
-Sources:
-{context}
 
-Answer concisely and cite the relevant sources.
-'''
+
+raise SystemExit()
 
 
 #########################################################
 #########################################################
+
+PROMPT = PROMPT_TEMPLATE.format(
+    question=QUESTION,
+    sources=CONTEXT
+)
+
 
 response = client.models.generate_content(
     model=MODEL,
@@ -92,13 +133,16 @@ response = client.models.generate_content(
 #########################################################
 #########################################################
 
-# --- 6. Вывод ---
-print("\nQUESTION:")
+### OUTPUT:
+
+print('\nQUESTION:')
 print(QUESTION)
-print("\nANSWER:")
+print('\nANSWER:')
 print(response.text)
-print("\nSOURCES (chunk_id):")
-print(list(top_chunk_ids))
+
+if(DEBUG):
+    print('\nSOURCES (chunk_id):')
+    print(list(top_chunk_ids))
 
 print(f'Job finished')
 
