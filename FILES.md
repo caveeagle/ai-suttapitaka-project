@@ -23,3 +23,7 @@
 `check_embeddings.py` - Check (delete or show) embeddings if chunks changed
 
 `indexing.py` - library (module) for indexing and search
+
+`true_validated_answers.txt` - True answers, validated by expert
+
+`validate_model.py` - Script for validating the model (with set of questions)
