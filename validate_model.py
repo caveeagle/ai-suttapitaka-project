@@ -91,6 +91,8 @@ query_vec = np.array(resp.embeddings[0].values, dtype=np.float32)
 
 top_chunk_ids, scores = search(index, chunk_ids, query_vec, k=TOP_K)
 
+assert len(top_chunk_ids) == TOP_K 
+
 if(DEBUG):
     print(f'Find top chunks ids: {top_chunk_ids}')
 
@@ -125,6 +127,8 @@ for row in rows:
     )
 
 SOURCES = '\n\n'.join(content_blocks)
+
+assert len(content_blocks) == TOP_K
 
 print(f'Make content blocks, ready for request:')
 
