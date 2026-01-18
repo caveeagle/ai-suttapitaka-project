@@ -15,7 +15,9 @@ DEBUG = 1
 
 TOP_K = 5
 
-#MODEL = 'gemini-2.0-flash-lite'
+TEMPERATURE = 0.2
+
+###MODEL = 'gemini-2.0-flash-lite'
 MODEL = 'gemini-2.5-pro'
 
 
@@ -23,6 +25,13 @@ QUESTION = (
     'According to the Buddha, which sensory experiences '
     'most strongly occupy a man’s mind?'
 )
+
+QUESTION = 'Can a health monk eat after noon?'
+
+QUESTION = 'In which year was the Buddha born?'
+
+QUESTION = 'Can a woman become an Arahant?'
+
 
 #########################################################
 #########################################################
@@ -49,7 +58,6 @@ Sources:
 
 Output format (must be exact):
 
-Answer:
 <answer OR the no-answer sentence>
 
 Sources:
@@ -129,9 +137,13 @@ PROMPT = PROMPT_TEMPLATE.format(
 )
 
 try:
+    
     response = client.models.generate_content(
         model=MODEL,
         contents=[PROMPT],
+        config={
+            'temperature': TEMPERATURE
+        }        
     )
 
 except ClientError as e:
