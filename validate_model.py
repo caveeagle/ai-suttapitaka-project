@@ -1,21 +1,24 @@
 import time
-import numpy as np
+import sys
 import sqlite3
+import numpy as np
+
 from google import genai
+from google.genai.errors import ClientError
 
 import secret_config
+
 from model_indexing import build_index, search
 
-from google.genai.errors import ClientError
 
 #########################################################
 #########################################################
 
 ####  MODE OF SCRIPT:  ###
 
-#MODE = 'VALIDATION'
+MODE = 'VALIDATION'
 
-MODE = 'TESTING'
+#MODE = 'TESTING'
 
 '''
 
@@ -30,9 +33,13 @@ VALIDATION - test all questions, and compare answers with true answ.
 
 TOP_K = 5
 
-TEMPERATURE = 0.2
+TEMPERATURE = 0.5
 
 MODEL = 'gemini-2.5-pro'
+
+FIRST_DELAY = 0.5 #  In seconds
+
+SECOND_DELAY = 2
 
 #####  QUESTION FOR VALIDATION:   #####
 
@@ -81,7 +88,9 @@ Sources:
 
 print(f'Begin to work...\n')
 
-for QUESTION in QUESTIONS:
+is_passed = True
+
+for Q_NUM, QUESTION in enumerate(QUESTIONS, start=1):    
     
     if MODE == 'TESTING':
         
@@ -101,7 +110,7 @@ for QUESTION in QUESTIONS:
         contents=[QUESTION],
     )
     
-    time.sleep(1)
+    time.sleep(FIRST_DELAY)
     
     if MODE == 'TESTING':
         print(f'Question embedded!')
@@ -112,7 +121,7 @@ for QUESTION in QUESTIONS:
     
     assert len(top_chunk_ids) == TOP_K 
     
-    if MODE == 'TESTING':
+    if(0):
         print(f'Find top chunks ids: {top_chunk_ids}')
     
     #########################################################
@@ -170,7 +179,7 @@ for QUESTION in QUESTIONS:
             }        
         )
         
-        time.sleep(2)
+        time.sleep(SECOND_DELAY)
         
     except ClientError as e:
         msg = str(e)
@@ -198,10 +207,81 @@ for QUESTION in QUESTIONS:
     
     if MODE == 'TESTING':
         break  # only last question
+
+    #########################################################
+    #########################################################
     
+    ### VALIDATIPN:
     
+    if MODE == 'VALIDATION':
+        
+        answ_text, sources_text = response.text.rsplit('Sources', 1)
+        
+        if Q_NUM==1:
+            
+            words = ['sight', 'sound', 'smell', 'taste', 'touch', 'of a woman']
+
+            result_1 = all(word in answ_text for word in words)
+            
+            result_2 = 'an1.1-10' in sources_text.lower()
+            
+            result = result_1 and result_2
+            
+        if Q_NUM==2:
+
+            words = ['commits an offense', 'cooked food', 'wrong time']
+
+            result_1 = all(word in answ_text for word in words)
+            
+            result_2 = 'pli-tv-bu-vb-pc37' in sources_text.lower()
+            
+            result =  result_1 and result_2
+            
+        if Q_NUM==3:
+            
+            result = "answer is not found" in answ_text
+             
+        if Q_NUM==4:
+            
+            result_1 = 'woman is able' in answ_text.lower()
+            
+            result_2 = 'she is able' in answ_text.lower()
+            
+            result_3 = 'an8.51' in sources_text.lower()
+            
+            result =  (result_1 or result_2) and result_3
+                
+        
+        ### RESULT:
+        if result:
+            
+            print(f'Test {Q_NUM} PASSED')
+        
+        else:    
+            
+            is_passed = False
+            
+            print(f'Test {Q_NUM} FAILED')
+        
+        
 #########################################################
 #########################################################
 
-print(f'\nJob finished')
 
+if MODE == 'VALIDATION':
+
+    if is_passed:
+            print(f'\nALL TESTS PASSED!')
+            sys.exit(0)
+
+    else:
+            print(f'Some errors were encountered!')
+            print(f'\nJob finished')
+            sys.exit(1)
+
+else:
+    print(f'\nJob finished')
+    sys.exit(0)
+
+#########################################################
+#########################################################
