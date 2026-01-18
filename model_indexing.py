@@ -37,8 +37,12 @@ def search(index, chunk_ids, query_vec, k=10):
     q /= np.linalg.norm(q)
 
     scores, idxs = index.search(q[None, :], k)
-    return chunk_ids[idxs[0]], scores[0]
-
+    
+    return (
+        chunk_ids[idxs[0]].tolist(),   # < list[int]
+        scores[0].tolist()
+    )
+    
 if(CHECK):
     
     index, chunk_ids = build_index()

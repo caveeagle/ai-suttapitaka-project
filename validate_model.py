@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import sqlite3
 from google import genai
@@ -5,14 +6,18 @@ from google import genai
 import secret_config
 from model_indexing import build_index, search
 
+from google.genai.errors import ClientError
+
 #########################################################
 #########################################################
 
-DEBUG = 0
+DEBUG = 1
 
 TOP_K = 5
 
-MODEL = 'gemini-2.0-flash-lite'
+#MODEL = 'gemini-2.0-flash-lite'
+MODEL = 'gemini-2.5-pro'
+
 
 QUESTION = (
     'According to the Buddha, which sensory experiences '
@@ -54,6 +59,8 @@ Sources:
 #########################################################
 #########################################################
 
+print(f'Begin to work...')
+
 API_KEY = secret_config.API_KEY
 
 if not API_KEY or not API_KEY.strip():
@@ -68,9 +75,16 @@ resp = client.models.embed_content(
     contents=[QUESTION],
 )
 
+time.sleep(2)
+
+print(f'Question embedded!')
+
 query_vec = np.array(resp.embeddings[0].values, dtype=np.float32)
 
 top_chunk_ids, scores = search(index, chunk_ids, query_vec, k=TOP_K)
+
+if(DEBUG):
+    print(f'Find top chunks ids: {top_chunk_ids}')
 
 #########################################################
 #########################################################
@@ -88,12 +102,6 @@ WHERE id IN ({placeholders})
 ORDER BY id
 '''
 
-
-query_debug = query
-for v in top_chunk_ids:
-    query_debug = query_debug.replace('?', repr(v), 1)
-print(top_chunk_ids)
-
 with sqlite3.connect(db) as conn:
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -108,28 +116,36 @@ for row in rows:
         f"[CHAPTER {row['chapter']}]\n{row['content']}"
     )
 
-CONTEXT = '\n\n'.join(content_blocks)
+SOURCES = '\n\n'.join(content_blocks)
 
-
-
-
-raise SystemExit()
-
+print(f'Make content blocks, ready for request:')
 
 #########################################################
 #########################################################
 
 PROMPT = PROMPT_TEMPLATE.format(
     question=QUESTION,
-    sources=CONTEXT
+    sources=SOURCES
 )
 
+try:
+    response = client.models.generate_content(
+        model=MODEL,
+        contents=[PROMPT],
+    )
 
-response = client.models.generate_content(
-    model=MODEL,
-    contents=[PROMPT],
-)
+except ClientError as e:
+    msg = str(e)
 
+    if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+        print(f'ERROR 429 - LIMITS EXCEEDED!')
+        # просто выходим, ничего не выводим
+        pass
+    else:
+        raise
+    
+print(f'Request finished.\n\n')
+    
 #########################################################
 #########################################################
 
@@ -140,11 +156,7 @@ print(QUESTION)
 print('\nANSWER:')
 print(response.text)
 
-if(DEBUG):
-    print('\nSOURCES (chunk_id):')
-    print(list(top_chunk_ids))
-
-print(f'Job finished')
+print(f'\n\nJob finished')
 
 #########################################################
 #########################################################
