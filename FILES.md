@@ -27,3 +27,7 @@
 `true_validated_answers.txt` - True answers, validated by expert
 
 `validate_model.py` - Script for validating the model (with set of questions)
+
+`suttapitaka_model.py` - main module for calling the model, with the single function `suttapitaka_answer(QUESTION:str)`
+
+`GUI-SUTTAPITAKA.py` - script to call GUI interface for the model
