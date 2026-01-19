@@ -1,22 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-
-def work(user_text: str) -> str:
-    result = []
-    result.append("Входные данные:")
-    result.append(user_text)
-    result.append("")
-    result.append("Результат обработки:")
-    result.append(user_text.upper())
-    result.append(f"Длина строки: {len(user_text)} символов")
-    return "\n".join(result)
-
+from suttapitaka_model import suttapitaka_answer
 
 def on_run():
     text = entry.get()
 
-    result = work(text)
+    result = suttapitaka_answer(text)
 
     output_text.config(state="normal")
     output_text.delete("1.0", tk.END)
